@@ -5,15 +5,36 @@ export const SOCIAL = "v1.social08.testnet";
 export const RPC = "https://rpc.testnet.near.org";
 export const NEAR_AI = "https://cloud-api.near.ai/v1";
 
-export type Receipt = { rid?: string; model: string; text: string; signature: string; signing_address: string };
+export type Receipt = { rid?: string; model: string; text: string; signature: string; signing_address: string; brief_hash?: string };
 
 const sha = (b: Buffer | string) => createHash("sha256").update(b).digest();
-// v2 leaf = SHA-256(receipt_id, signed text "model:request_hash:response_hash", TEE signature). v1 (batch b1) had no receipt_id.
+// v3 leaf = SHA-256(receipt_id, signed text "model:request_hash:response_hash", TEE signature, SHA-256 of the brief text).
+// v2 had no brief hash; v1 (pilot batch b1) had no receipt_id either.
 export const leaf = (r: Receipt) =>
-  sha(r.rid ? `${r.rid}\n${r.text}\n${r.signature.toLowerCase()}` : `${r.text}\n${r.signature.toLowerCase()}`);
+  sha(r.brief_hash ? `${r.rid}\n${r.text}\n${r.signature.toLowerCase()}\n${r.brief_hash}`
+    : r.rid ? `${r.rid}\n${r.text}\n${r.signature.toLowerCase()}` : `${r.text}\n${r.signature.toLowerCase()}`);
 
 export const MIN_BATCH = 10;
 export const bucket = (n: number) => (n >= 100 ? "100+" : n >= 50 ? "50-99" : n >= 25 ? "25-49" : n >= 10 ? "10-24" : "<10");
+
+// Inclusion proof for one leaf: sibling hashes from the bottom up. side "L" = sibling goes on the left.
+export function merkleProof(receipts: Receipt[], target: string): { side: "L" | "R"; hash: string }[] | null {
+  let level = receipts.map(leaf).sort(Buffer.compare);
+  let i = level.findIndex((b) => b.toString("hex") === target);
+  if (i < 0) return null;
+  const path: { side: "L" | "R"; hash: string }[] = [];
+  while (level.length > 1) {
+    const sib = i % 2 ? i - 1 : i + 1;
+    if (sib < level.length) path.push({ side: i % 2 ? "L" : "R", hash: level[sib].toString("hex") });
+    const next: Buffer[] = [];
+    for (let k = 0; k < level.length; k += 2)
+      next.push(k + 1 < level.length ? sha(Buffer.concat([level[k], level[k + 1]])) : level[k]);
+    level = next; i = Math.floor(i / 2);
+  }
+  return path;
+}
+export const walkProof = (start: string, path: { side: "L" | "R"; hash: string }[]) =>
+  path.reduce((h, s) => sha(Buffer.concat(s.side === "L" ? [Buffer.from(s.hash, "hex"), h] : [h, Buffer.from(s.hash, "hex")])), Buffer.from(start, "hex")).toString("hex");
 
 export function merkleRoot(receipts: Receipt[]): string {
   let level = receipts.map(leaf).sort(Buffer.compare);

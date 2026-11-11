@@ -54,7 +54,7 @@ const first = new Date(Math.min(...valid.map((r) => +when(r))));
 const week = isoWeek(first);
 const id = `${week}-${String(batches.filter((b) => b.id.startsWith(week)).length + 1).padStart(2, "0")}`;
 const record = {
-  v: 2, batch_id: id, merkle_root: merkleRoot(valid), count_bucket: bucket(valid.length),
+  v: valid.every((r) => r.brief_hash) ? 3 : 2, batch_id: id, merkle_root: merkleRoot(valid), count_bucket: bucket(valid.length),
   week_of: monday(first).toISOString().slice(0, 10),
   models: [...new Set(valid.map((r) => r.model))],
   signers: [...new Set(valid.map((r) => r.signing_address.toLowerCase()))],
@@ -82,7 +82,7 @@ const tx = out.transaction_outcome.id;
 
 const langs: Record<string, number> = {};
 for (const r of valid) langs[r.lang] = (langs[r.lang] || 0) + 1;
-writeFileSync(`${DATA}/public/batch-${id}.json`, JSON.stringify({ id, ...record, tx, receipts: valid.map(({ rid, model, text, signature, signing_address }) => ({ rid, model, text, signature, signing_address })) }, null, 1));
+writeFileSync(`${DATA}/public/batch-${id}.json`, JSON.stringify({ id, ...record, tx, receipts: valid.map(({ rid, model, text, signature, signing_address, brief_hash }) => ({ rid, model, text, signature, signing_address, ...(brief_hash ? { brief_hash } : {}) })) }, null, 1));
 batches.push({ id, ...record, tx, briefs: valid.length, langs, anchoredAt: new Date().toISOString().slice(0, 10), leaves: valid.map((r) => leaf(r).toString("hex")) });
 writeFileSync(`${DATA}/batches.json`, JSON.stringify(batches, null, 1));
 console.log(JSON.stringify({ anchored: true, id, count_bucket: record.count_bucket, root: record.merkle_root, tx, explorer: `https://testnet.nearblocks.io/txns/${tx}` }));

@@ -1,5 +1,5 @@
 // zo.space API route: /api/papertrail/pledge
-// POST {"amount": 25|50|100} → writes an anonymous testnet pledge to NEAR (no money moves), returns it.
+// POST {"amount": 1|3|5} → writes an anonymous testnet pledge to NEAR (no money moves), returns it.
 // GET ?id=PT-XXXXXXXX → one pledge.  GET → totals (briefs funded vs. verified briefs available).
 import type { Context } from "hono";
 import { readFileSync, existsSync } from "node:fs";
@@ -20,7 +20,7 @@ export default async (c: Context) => {
   if (c.req.method === "POST") {
     const body = await c.req.json().catch(() => ({}));
     const amount = Number(body?.amount);
-    if (![25, 50, 100].includes(amount)) return c.json({ error: "amount must be 25, 50 or 100" }, 400);
+    if (![1, 3, 5].includes(amount)) return c.json({ error: "amount must be 1, 3 or 5" }, 400);
     const proc = Bun.spawn([process.execPath, "pledge.ts", "new", String(amount)], { cwd: `${ROOT}/chain`, stdout: "pipe", stderr: "pipe" });
     const out = (await new Response(proc.stdout).text()).trim().split("\n").pop() || "{}";
     await proc.exited;
@@ -37,7 +37,7 @@ export default async (c: Context) => {
     const p = all.find((x: any) => x.id === id);
     return p ? c.json(view(p)) : c.json({ error: "not found" }, 404);
   }
-  const fundable = readJson(`${DATA}/batches.json`, []).filter((b: any) => b.v === 2).reduce((n: number, b: any) => n + b.leaves.length, 0);
+  const fundable = readJson(`${DATA}/batches.json`, []).filter((b: any) => b.v >= 2).reduce((n: number, b: any) => n + b.leaves.length, 0);
   return c.json({
     pledges: all.length,
     usd_pledged: all.reduce((n: number, p: any) => n + p.amount_usd, 0),

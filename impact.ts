@@ -7,6 +7,12 @@ const ACCOUNT = "papertrail-impact.testnet";
 const readJson = (p: string) => (existsSync(p) ? JSON.parse(readFileSync(p, "utf8")) : null);
 
 export default (c: Context) => {
+  const spec = c.req.query("specimen");
+  if (spec) {
+    if (!/^[0-9a-f]{64}$/.test(spec)) return c.json({ error: "bad leaf" }, 400);
+    const s = readJson(`${DATA}/public/specimen/${spec}.json`);
+    return s ? c.json(s) : c.json({ error: "not a specimen brief: real briefs are never published" }, 404);
+  }
   const id = c.req.query("batch");
   if (id) {
     if (!/^(b\d+|\d{4}-W\d{2}-\d{2})$/.test(id)) return c.json({ error: "bad batch id" }, 400);

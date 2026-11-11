@@ -38,7 +38,9 @@ type Case = { docs: Doc[]; visits: Visit[]; pending?: Pending; lang?: string; la
 const SID = () => process.env.TWILIO_ACCOUNT_SID || "";
 const TOKEN = () => process.env.TWILIO_AUTH_TOKEN || "";
 const NEAR_KEY = () => process.env.near_key || process.env.NEAR_AI_KEY || "";
-const dry = () => !SID() || !TOKEN();
+// Fake +1555 numbers are the test harness (test/demo.py): replies go to dryrun.log, briefs are SPECIMEN and may be published.
+const DEMO = (n = "") => /^whatsapp:\+1555\d{7}$/.test(n);
+const dry = (to = "") => !SID() || !TOKEN() || DEMO(to);
 const twAuth = () => "Basic " + Buffer.from(`${SID()}:${TOKEN()}`).toString("base64");
 
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
@@ -172,7 +174,7 @@ function chunks(body: string, max = 1500): string[] {
 }
 async function send(to: string, from: string, body: string) {
   for (const part of chunks(body)) {
-    if (dry()) {
+    if (dry(to)) {
       mkdirSync(DATA_DIR, { recursive: true });
       appendFileSync(`${DATA_DIR}/dryrun.log`, `--- to ${to} ---\n${part}\n\n`);
       continue;
@@ -364,13 +366,17 @@ async function proofText(c: Case) {
 }
 function batchText(c: Case) {
   if (!c.briefs?.length) return "";
-  let batches: any[] = [];
+  let batches: any[] = [], pledges: any[] = [];
   try { batches = JSON.parse(readFileSync(`${DATA_DIR}/batches.json`, "utf8")); } catch {}
+  try { pledges = JSON.parse(readFileSync(`${DATA_DIR}/pledges.json`, "utf8")); } catch {}
   for (const b of [...c.briefs].reverse()) {
     const hit = batches.find((x) => x.leaves?.includes(b.leaf));
-    if (hit) return `\n\nYour brief is part of verified batch ${hit.id}. This shows it was made inside a sealed AI enclave. It does not show anything about you.`;
+    if (!hit) continue;
+    const by = pledges.find((p) => p.funds?.some((a: any) => a.leaves.includes(b.leaf)));
+    return `\n\nYour brief ${b.leaf.slice(0, 12)} is part of verified batch ${hit.id}. This shows it was made inside a sealed AI enclave. It does not show anything about you.` +
+      (by ? `\n\nAn anonymous donor sponsored this brief (pledge ${by.id}). They will never know who you are, and you will never know who they are.` : "");
   }
-  return "\n\nYour latest brief will join the next verified batch. Batches are published weekly, only once 10 or more briefs are ready, and never sooner than 2 days after the newest one.";
+  return `\n\nYour latest brief (${c.briefs[c.briefs.length - 1].leaf.slice(0, 12)}) will join the next verified batch. Batches are published weekly, only once 10 or more briefs are ready, and never sooner than 2 days after the newest one.`;
 }
 
 function courtText(c: Case) {
@@ -379,7 +385,7 @@ function courtText(c: Case) {
   return `Check your next hearing anytime: ${COURT_LOOKUP}.${a ? `\nYour A-Number on file: ${fmtA(a)}` : "\nYour A-Number is on your Notice to Appear. Send me a photo of it and I'll keep it handy."}${h ? `\nLast hearing date I saw: ${nice(h.date)}.` : ""}\n\nFor free court-date text reminders, Hola Asistente (Mobile Pathways) can help.`;
 }
 
-async function briefText(c: Case) {
+async function briefText(c: Case, specimen = false) {
   const D = own(c);
   const pick = <K extends keyof Facts>(k: K) => D.map((d) => d.f[k]).find(Boolean) as Facts[K] | undefined;
   const names = [...new Map(D.filter((d) => d.f.holder).map((d) => [d.f.holder!, d.label])).entries()];
@@ -416,16 +422,22 @@ async function briefText(c: Case) {
   if (fl.length) s.push(`FLAGS\n${fl.map((x) => `⚠ ${x}`).join("\n")}`);
   if (c.visits.length) s.push(`LEGAL AID VISITS\n${c.visits.map((v) => `${v.date ? (iso(v.date) ? nice(v.date) : v.date) : "?"}, ${v.org || "?"}${v.next ? `. Next: ${v.next}` : ""}`).join("\n")}`);
   const sig = await signature(c);
-  if (sig?.signature && sig?.text) {
-    const rid = randomBytes(16).toString("hex");
-    const leaf = createHash("sha256").update(`${rid}\n${sig.text}\n${String(sig.signature).toLowerCase()}`).digest("hex");
-    try {
-      appendFileSync(`${DATA_DIR}/receipts.jsonl`, JSON.stringify({ rid, at: new Date().toISOString(), day: today(), model: sig.model, text: sig.text, signature: sig.signature, signing_address: sig.signing_address, lang: c.lang || "en" }) + "\n");
-      c.briefs = [...(c.briefs || []), { rid, leaf }].slice(-20);
-    } catch (e) { console.error("papertrail receipt", String(e)); }
-  }
   s.push(`PRIVACY\nEvery document was read inside a NEAR AI Confidential TEE and the photo deleted.${sig ? ` Latest TEE receipt: ${sig.model}, signer ${sig.signing_address}, request ${c.lastChat}.` : ""}`);
-  return s.join("\n\n");
+  const body = s.join("\n\n");
+  if (!sig?.signature || !sig?.text) return body;
+  // v3 leaf binds the exact brief text (by hash) to the TEE receipt. Only the hash ever leaves this function.
+  const rid = randomBytes(16).toString("hex");
+  const briefHash = createHash("sha256").update(body).digest("hex");
+  const leaf = createHash("sha256").update(`${rid}\n${sig.text}\n${String(sig.signature).toLowerCase()}\n${briefHash}`).digest("hex");
+  try {
+    appendFileSync(`${DATA_DIR}/receipts.jsonl`, JSON.stringify({ rid, at: new Date().toISOString(), day: today(), model: sig.model, text: sig.text, signature: sig.signature, signing_address: sig.signing_address, brief_hash: briefHash, lang: c.lang || "en" }) + "\n");
+    c.briefs = [...(c.briefs || []), { rid, leaf }].slice(-20);
+    if (specimen) {
+      mkdirSync(`${DATA_DIR}/public/specimen`, { recursive: true });
+      writeFileSync(`${DATA_DIR}/public/specimen/${leaf}.json`, JSON.stringify({ leaf, brief_hash: briefHash, brief: body, note: "SPECIMEN brief from fake test documents. Real briefs are never published." }, null, 1));
+    }
+  } catch (e) { console.error("papertrail receipt", String(e)); return body; }
+  return `${body}\n\nBRIEF FINGERPRINT\n${leaf.slice(0, 12)}`;
 }
 
 // ---------- legal aid visit log ----------
@@ -511,15 +523,15 @@ async function processMessage(p: Record<string, string>) {
       try { replies.push(await handleImage(c, p[`MediaUrl${i}`], ct, body)); }
       catch (e) { console.error("papertrail image", String(e)); replies.push("Something went wrong reading that photo. Please send it again."); }
     }
-    const scrubbed = await scrubInbound(urls, p.MessageSid);
+    const scrubbed = DEMO(from) ? false : await scrubInbound(urls, p.MessageSid);
     replies[replies.length - 1] += `\n\n🔒 Read privately in a sealed TEE.${scrubbed ? " Your photo has been deleted." : ""}`;
   } else {
-    scrubInbound([], p.MessageSid);
+    if (!DEMO(from)) scrubInbound([], p.MessageSid);
     const cmd = CMD[body.toLowerCase().replace(/[.!?¿¡]/g, "").trim()];
     if (cmd === "list") replies.push(listText(c));
     else if (cmd === "brief") {
       if (!c.docs.length) replies.push("Nothing to summarize yet. Send a photo of a document first.");
-      else { replies.push("Here's your summary for a lawyer. Forward the next message to them. It's in English because that's what US courts use."); raw.push(await briefText(c)); }
+      else { replies.push("Here's your summary for a lawyer. Forward the next message to them. It's in English because that's what US courts use."); raw.push(await briefText(c, DEMO(from))); }
     }
     else if (cmd === "visit") { c.pending = { kind: "visit", step: 0, draft: {} }; replies.push(VISIT_Q[0]); }
     else if (cmd === "court") replies.push(courtText(c));

@@ -2,16 +2,18 @@
 
 Serves the fake docs on a local port, posts Twilio-shaped webhooks to the route,
 and prints the replies the route writes to data/dryrun.log.
-Only works while TWILIO_* secrets are unset (dry-run mode).
+Fake +1555 numbers always run in dry-run mode: replies go to data/dryrun.log, never to WhatsApp.
+If TWILIO_AUTH_TOKEN is set, requests are signed so the live route accepts them.
 Usage: python3 test/demo.py [route_url] [--short] [--from=whatsapp:+1555...]
 Seed a demo batch: run --short with 10 different --from numbers, then `cd chain && bun anchor.ts --now`.
 """
-import http.server, json, sys, threading, time, urllib.parse, urllib.request
+import base64, hashlib, hmac, http.server, json, os, sys, threading, time, urllib.parse, urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
 URL = ARGS[0] if ARGS else "http://localhost:3099/api/papertrail"
+PUBLIC_URL = "https://kikib.zo.space/api/papertrail"
 LOG = ROOT.parent / "data" / "dryrun.log"
 PORT = 8765
 FROM = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--from=")), "whatsapp:+15550000001")
@@ -41,12 +43,19 @@ STEPS = [
     ("text", "PROOF"),
 ]
 if "--short" in sys.argv:  # one document then BRIEF: produces one TEE receipt for the impact batch
-    STEPS = [("text", "hola"), ("photo", "passport.jpg"), ("text", "carpeta roja"), ("text", "BRIEF")]
+    DOC = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--doc=")), "passport.jpg")
+    STEPS = [("text", "hola"), ("photo", DOC), ("text", "carpeta roja"), ("text", "BRIEF")]
 
 
 def post(params):
-    data = urllib.parse.urlencode({"From": FROM, "To": "whatsapp:+14155238886", "MessageSid": "SMtest", **params}).encode()
-    urllib.request.urlopen(urllib.request.Request(URL, data=data), timeout=30).read()
+    params = {"From": FROM, "To": "whatsapp:+14155238886", "MessageSid": "SMtest", **params}
+    headers = {}
+    token = os.environ.get("TWILIO_AUTH_TOKEN")
+    if token:  # sign like Twilio does, so the live route accepts it. +1555 numbers never get a real WhatsApp reply.
+        payload = PUBLIC_URL + "".join(k + params[k] for k in sorted(params))
+        headers["X-Twilio-Signature"] = base64.b64encode(hmac.new(token.encode(), payload.encode(), hashlib.sha1).digest()).decode()
+    data = urllib.parse.urlencode(params).encode()
+    urllib.request.urlopen(urllib.request.Request(URL, data=data, headers=headers), timeout=30).read()
 
 
 def wait_quiet(start, quiet=6, cap=150):

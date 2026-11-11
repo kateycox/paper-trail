@@ -53,5 +53,37 @@
    "f36ceb71599e82810a282ec65a781c216462ebbe0254add538e77db6ddf02c34",
    "acf9a3d028895f2dce1e0ca34c02460e4371d0d29282b62df91cd75c25059146"
   ]
+ },
+ {
+  "id": "2026-W46-02",
+  "v": 3,
+  "batch_id": "2026-W46-02",
+  "merkle_root": "f4e2a738779c2c9541cc91efcc10f56be8e053530a35a7a1bac6df1d9fc4e8a0",
+  "count_bucket": "10-24",
+  "week_of": "2026-11-09",
+  "models": [
+   "Qwen/Qwen3-VL-30B-A3B-Instruct"
+  ],
+  "signers": [
+   "0x2665cce942fa427ef30d87f4b0bff67fb7645462"
+  ],
+  "tx": "GEGzDtqreUyR1juAyc6CcraW3ALDfm8d8QrBKHJQfAuk",
+  "briefs": 10,
+  "langs": {
+   "es": 10
+  },
+  "anchoredAt": "2026-11-11",
+  "leaves": [
+   "5d5b5ee5fe209055e53300bc9235be6120a73c393d2b3750ad932c92b2e48460",
+   "b18f34c3d40c8c4be44478852a75e1dc787aedbbd11497620b2b18f63ff2312d",
+   "a1d5b813495b12c82ec772d4071cbbc57b44ea4823c8c772aacdbaac2d7b7712",
+   "1017a668fcda44d4749ddf8d2ed606328943198bcdb6b8d7d8b8572ff990ad9e",
+   "0a295c0892f8a5e2ed405b69559082f97c3fa93bce18977f49e98dbbac5d78e3",
+   "cdfd81bce9daa08692237b6136981461e3e49953e68163aaa2465b46fd701dc0",
+   "34b5b416ade6dbb7537d1853fc65c982941fbe5f9da8ff6eb41aca12ebdb4aff",
+   "09b2ca323aa5805b23bb61aa3ef356a23828a99c72ba38b5629c200f671b85ac",
+   "a61291f8597ce5e2cd5c422430608bbb2b764f077a793b239f36d97b098ad539",
+   "d46a1941cf0aa752fdf0335e6ce5c9d5b96368fd95d0ae5d1ffd50ce3c074d6a"
+  ]
  }
 ]

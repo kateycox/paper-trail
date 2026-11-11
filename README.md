@@ -26,12 +26,13 @@ WhatsApp (Twilio Sandbox) → `https://kikib.zo.space/api/papertrail` (one zo.sp
 
 Donors get proof of impact. Immigrants don't get watched.
 
-1. A user texts `BRIEF`. The TEE model's signature for that brief is fetched from NEAR AI Cloud.
-2. Paper Trail draws a random `receipt_id` and makes a leaf: `SHA-256(receipt_id, "model:request_hash:response_hash", tee_signature)`. The receipt goes to `data/receipts.jsonl` (no names, numbers or document text). The `receipt_id` and leaf are also stored in that user's encrypted record and nowhere else that ties them to a person.
-3. `chain/anchor.ts` checks every signature against NEAR AI's attested enclave keys, builds a Merkle tree, and writes one record to SocialDB under `papertrail-impact.testnet/papertrail/batch/<batch_id>`:
-   `{ v: 2, batch_id: "2026-W46-01", merkle_root, count_bucket: "10-24", week_of: "2026-11-09", models, signers }` (`signers` are the enclave keys, shared by every user).
-4. The receipts for a batch are published at `/api/papertrail/impact?batch=<id>`, so anyone can recompute the root (`chain/verify.ts`, or "Verify in this browser" on the impact page).
-5. `PROOF` on WhatsApp tells the user which batch their brief is in, and that this shows nothing about them. After `DELETE`, their `receipt_id` is gone and their leaf can't be linked to anyone, including by the operator.
+1. A user texts `BRIEF`. The TEE model's signature for the case's latest document read is fetched from NEAR AI Cloud.
+2. Paper Trail draws a random `receipt_id`, hashes the exact brief text, and makes a leaf (v3): `SHA-256(receipt_id, "model:request_hash:response_hash", tee_signature, SHA-256(brief_text))`. The receipt goes to `data/receipts.jsonl` with the brief hash only (no names, numbers or document text). The `receipt_id` and leaf are also stored in that user's encrypted record and nowhere else that ties them to a person.
+3. The brief the user receives ends with `BRIEF FINGERPRINT` and the first 12 characters of its leaf. Whoever holds the brief (the person, or the lawyer they forward it to) can look that fingerprint up on the impact page. The same 12 characters show up on the donor's pledge.
+4. `chain/anchor.ts` checks every signature against NEAR AI's attested enclave keys, builds a Merkle tree, and writes one record to SocialDB under `papertrail-impact.testnet/papertrail/batch/<batch_id>`:
+   `{ v: 3, batch_id: "2026-W46-02", merkle_root, count_bucket: "10-24", week_of: "2026-11-09", models, signers }` (`signers` are the enclave keys, shared by every user).
+5. The receipts for a batch are published at `/api/papertrail/impact?batch=<id>`, so anyone can recompute the root (`chain/verify.ts`, or "Verify in this browser" on the impact page).
+6. `PROOF` on WhatsApp tells the user their brief's fingerprint, which batch it's in, that this shows nothing about them, and, if a donor sponsored it, the pledge id ("They will never know who you are, and you will never know who they are"). After `DELETE`, their `receipt_id` is gone and their leaf can't be linked to anyone, including by the operator.
 
 Re-identification guardrails (a small clinic serving three people a week could be found by exact dates):
 
@@ -48,13 +49,22 @@ What it proves: a TEE-verified brief was delivered. What it doesn't: that a case
 
 The link from a donor's money to delivered work is on the ledger, not in a popup.
 
-1. A donor clicks **Sponsor a case** on the impact page and picks $25, $50 or $100 ($25 = one brief). No name, email or wallet is asked for. In the hackathon build no money moves; the pledge itself is real and public on NEAR testnet.
-2. `chain/pledge.ts` matches the pledge to specific briefs that were **already delivered and anchored** (oldest unfunded first) and writes `papertrail-impact.testnet/papertrail/pledge/<PT-XXXXXXXX>` to SocialDB:
+1. A donor clicks **Sponsor a case** on the impact page and picks $1, $3 or $5 ($1 = one brief; a demo price, set by `PRICE_PER_BRIEF` in `chain/pledge.ts`). No name, email or wallet is asked for. In the hackathon build no money moves; the pledge itself is real and public on NEAR testnet.
+2. `chain/pledge.ts` matches the pledge to specific briefs that were **already delivered and anchored** (newest verified batch first: a gift funds this week's proven work) and writes `papertrail-impact.testnet/papertrail/pledge/<PT-XXXXXXXX>` to SocialDB:
    `{ v: 1, pledge_id, amount_usd, briefs, week_of, status, funds: [{ batch_id, leaves: [<leaf hashes>] }] }`
 3. If every delivered brief already has a sponsor, the pledge waits. `anchor.ts` runs `matchWaiting()` after each new batch and writes the updated record.
-4. The donor gets a tracking link (`/papertrail?pledge=PT-...`). "Trace my pledge on NEAR" checks, in the browser, from NEAR RPC and the public receipts: the pledge exists on-chain, the batch root on NEAR matches its receipts, each funded leaf is inside that batch, each carries a valid TEE signature, and **no other pledge on-chain claims the same brief**. The same checks run from the command line: `bun chain/verify-pledge.ts PT-XXXXXXXX`.
+4. The donor gets a tracking link (`/papertrail?pledge=PT-...`). "Follow my pledge to the brief" walks one funded brief down to NEAR, link by link, every value computed or fetched in the browser:
+   1. the pledge record, read live from NEAR RPC, names the brief's fingerprint;
+   2. the brief's public receipt is in the batch;
+   3. for SPECIMEN briefs, the published brief text hashes to the `brief_hash` sealed in the receipt (real briefs are never published; only the person holding one can do this check);
+   4. the TEE signature recovers to the enclave key;
+   5. that key is listed in NEAR AI's live attestation report;
+   6. hashing the receipt gives the fingerprint the pledge names;
+   7. the Merkle path from that fingerprint reaches the root stored on NEAR;
+   8. no other pledge on NEAR claims the brief.
+   It ends with the full public record for that brief, so viewers can see there's nothing personal in it. The same chain runs from the command line: `bun chain/verify-pledge.ts PT-XXXXXXXX`. "Check a brief" on the page runs it from the other side, starting from the fingerprint printed on a brief.
 
-Why it's safe: a leaf is a hash of a random `receipt_id` and the enclave's signature, so the pledge points at proof of work, never at a person. Pledges are written at the donor's time, not the user's, so they add no timing signal about users. Abuse limits: 30 pledges per hour, 50 waiting at most.
+Why it's safe: a leaf is a hash of a random `receipt_id`, the enclave's signature and a hash of the brief, so the pledge points at proof of work, never at a person. Pledges are written at the donor's time, not the user's, so they add no timing signal about users. Abuse limits: 30 pledges per hour, 50 waiting at most.
 
 Why it's different from earlier donor-tracking chains: the outcome isn't confirmed by a human third party (Alice.si) or a private permissioned ledger (WFP Building Blocks). Sealed hardware signs the work, the public ledger holds only fingerprints, and double-counting is checkable by anyone.
 
@@ -63,7 +73,8 @@ Links:
 - Pilot batch `b1` (written before the guardrails existed: exact count 3, languages on-chain): tx `4LtmhGZRsyhCJMFVr6kkWsQu8N27WsE1gzY7JMoJtt94`
 - Public feed: https://kikib.zo.space/api/papertrail/impact (`impact.ts`)
 - Public impact page: https://kikib.zo.space/papertrail (`impact-page.tsx`): totals, a "Verify in this browser" button per batch (checks every TEE signature, recomputes the root, reads NEAR RPC directly), and "Sponsor a case", which writes a testnet pledge and shows its tracker.
-- Pledge API: `POST https://kikib.zo.space/api/papertrail/pledge {"amount":25}`, `GET ...?id=PT-...`, `GET` for totals (`pledge-api.ts`)
+- SPECIMEN brief texts: `/api/papertrail/impact?specimen=<leaf>`. Only briefs made by the test harness (fake `+1555` numbers, fake documents) are written there. Briefs for real numbers never are.
+- Pledge API: `POST https://kikib.zo.space/api/papertrail/pledge {"amount":1}`, `GET ...?id=PT-...`, `GET` for totals (`pledge-api.ts`)
 
 Anti-scam: on first contact and on `SCAM` / `ESTAFA`, users get a fixed English or Spanish message: Paper Trail will never ask for money, crypto or a digital wallet; anyone claiming to be Paper Trail, USCIS, ICE, the court or a lawyer who asks for crypto or gift cards is a scammer; report at reportfraud.ftc.gov.
 
@@ -82,19 +93,20 @@ Needs [Bun](https://bun.sh). No keys needed for steps 1–3.
 
    → each TEE signature checks out, the recomputed Merkle root equals the root stored on SocialDB, last line `VERIFIED`.
 
-3. Trace a sponsorship pledge to the briefs it paid for:
+3. Follow a $1 pledge to the exact brief it paid for:
 
    ```sh
-   bun verify-pledge.ts PT-63AC8205
+   bun verify-pledge.ts PT-1C9770B5
    ```
 
-   → the pledge record is read from NEAR, its 2 funded briefs are found inside batch `2026-W46-01`, their TEE signatures check out, no other pledge claims them, last line `VERIFIED`. In a browser: open https://kikib.zo.space/papertrail?pledge=PT-63AC8205 → "Trace my pledge on NEAR" → 5 green checks. Or click "Sponsor a case" to make your own pledge.
+   → the pledge is read from NEAR and names brief `5d5b5ee5fe20…`; the SPECIMEN brief text hashes to the `brief_hash` in its receipt; the TEE signature recovers to `0x2665cce9…`, which is in NEAR AI's live attestation report; 4 Merkle steps reach the root stored on NEAR for batch `2026-W46-02`; no other pledge claims it; last line `VERIFIED`.
+   In a browser: open https://kikib.zo.space/papertrail?pledge=PT-1C9770B5 → "Follow my pledge to the brief" → 8 steps, each with the value it checked, then "Read the SPECIMEN brief" and the full public record. Or click "Sponsor a case" to make your own pledge, or type `d46a1941cf0a` into "Check a brief".
 
 4. Generate fake specimen documents: `python3 test/make_fake_docs.py` → JPGs in `test/fake-docs/`, all marked SPECIMEN.
 
 5. Full conversation (needs a NEAR AI key as `near_key`, running the route locally or on Zo): `python3 test/demo.py <route_url>` → prints every reply of a Spanish session: document reads, the save filter blocking "me arrestaron en 2019", `LIST`, `BRIEF`, `PROOF`.
 
-6. Seed and anchor a batch: run step 5 with `--short` and 10 different `--from=whatsapp:+1555...` numbers, then `cd chain && bun anchor.ts --now` (needs a funded testnet account key as `near_impact_key` or in `~/.near-credentials`; without one it prints the record it would write).
+6. Seed and anchor a batch: run step 5 with `--short`, `--doc=<file in test/fake-docs>` and 10 different `--from=whatsapp:+1555...` numbers (fake numbers always stay in dry-run mode; with `TWILIO_AUTH_TOKEN` set, the script signs requests so the live route accepts them), then `cd chain && bun anchor.ts --now` (needs a funded testnet account key as `near_impact_key` or in `~/.near-credentials`; without one it prints the record it would write).
 
 ## Source and tests
 
@@ -125,3 +137,6 @@ WhatsApp is end-to-end encrypted to the Business API, where Twilio/Meta decrypt 
 The ledger proves a TEE-verified brief was delivered, not case outcomes. Batches are delayed and bucketed to reduce re-identification in small communities. The receipts file for each batch lists every receipt so anyone can verify it, which means the exact count of a batch can be read off-chain.
 
 Pledges are a hackathon stand-in for payment: no money moves, and nothing stops someone from pledging and not paying. In production the pledge would be written only after a payment clears. Pledge `PT-63AC8205` has two on-chain writes: the first wrongly reused a brief already funded by `PT-20B0DEC8` (a bug in the matcher, fixed the same hour); the second, current record corrects it. Both stay visible on NEAR.
+The enclave signs the AI's reading of the documents. The brief itself is assembled from those readings by Paper Trail's code, which then seals the brief's hash into the receipt. So hardware proves the documents were read privately, and the hash proves which exact brief came out, but the step in between is ordinary server code, not the TEE.
+
+Pledges made before the price change (`PT-20B0DEC8`, `PT-63AC8205`, `PT-6A1E050B`, `PT-BFF3D51E`) were testnet tests at $25 per brief and fund v2 briefs from batch `2026-W46-01`, made before brief hashing.

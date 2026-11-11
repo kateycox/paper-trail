@@ -14,7 +14,7 @@ console.log(`  every TEE signature valid:   ${sigOk ? "yes" : "NO"}`);
 console.log(`  signers in batch record:     ${b.receipts.every((r: any) => chain?.signers?.includes(r.signing_address.toLowerCase())) ? "yes" : "NO"}`);
 console.log(`  root recomputed:             ${root}`);
 const chainRoot = chain?.merkle_root ?? chain?.root;
-const countOk = chain?.v === 2 ? chain.count_bucket === bucket(b.receipts.length) : chain?.briefs === b.receipts.length;
+const countOk = chain?.v >= 2 ? chain.count_bucket === bucket(b.receipts.length) : chain?.briefs === b.receipts.length;
 console.log(`  root on NEAR (SocialDB):     ${chainRoot ?? "not found"}`);
 console.log(`  count matches NEAR record:   ${countOk ? "yes" : "NO"}${chain?.count_bucket ? ` (${chain.count_bucket})` : ""}`);
 console.log(sigOk && chainRoot === root && countOk ? "VERIFIED" : "FAILED");

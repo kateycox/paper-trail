@@ -1,0 +1,97 @@
+{
+ "id": "2026-W46-02",
+ "v": 3,
+ "batch_id": "2026-W46-02",
+ "merkle_root": "f4e2a738779c2c9541cc91efcc10f56be8e053530a35a7a1bac6df1d9fc4e8a0",
+ "count_bucket": "10-24",
+ "week_of": "2026-11-09",
+ "models": [
+  "Qwen/Qwen3-VL-30B-A3B-Instruct"
+ ],
+ "signers": [
+  "0x2665cce942fa427ef30d87f4b0bff67fb7645462"
+ ],
+ "tx": "GEGzDtqreUyR1juAyc6CcraW3ALDfm8d8QrBKHJQfAuk",
+ "receipts": [
+  {
+   "rid": "f2a027fb231640f788215b73e7a2609b",
+   "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+   "text": "Qwen/Qwen3-VL-30B-A3B-Instruct:76ae0c5844bf892c103fd6acd8024abdae4068d67f23ad6a1ec8bc33f1ba26a9:5ae26409285e61d31e11fa2c45b1f26e33475d6e61d1ef8f9d57e4ef7bcafb95",
+   "signature": "0xd28c4f816ef190799dec203796bcfcfdf21c2898a986c38ada421744fa4896d26c2a91a8d651bc718b1b30c5c9d2a0581c0aabaa83eba8a46f77f07e37508b8c1b",
+   "signing_address": "0x2665cce942fa427ef30d87f4b0bff67fb7645462",
+   "brief_hash": "3e24b9eb93c45029e515982c2178101e5dfb7ce2fe737d0787c6680ec5b87d60"
+  },
+  {
+   "rid": "613e7a667693430759bf7bc0ac62d99e",
+   "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+   "text": "Qwen/Qwen3-VL-30B-A3B-Instruct:7b8e18f8577ef15fc8474e73eff92348f3f65a823c98c1230abf9db8734ab62d:0d4f7d9fddb75faefc0e5528b1e6f83768aee1ebff4f439f3e2f3b1fe010b6af",
+   "signature": "0x38f9510138dd7bdee05b208ad812f0b51510311993e024c128d09e45f6f8bf1f647cb1d63570766d6a4f3659536a953f21736c439ba3b3cec7633467efe85e471c",
+   "signing_address": "0x2665cce942fa427ef30d87f4b0bff67fb7645462",
+   "brief_hash": "83b0e0fc514f79a5c9b8cd2e2d4f65b11427952bfbe01cb1fc108b22a03fc4bf"
+  },
+  {
+   "rid": "ce16e533ced4af93d1eff3cd5e5391f5",
+   "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+   "text": "Qwen/Qwen3-VL-30B-A3B-Instruct:5527326b4b32ed7c4929b629165c4ff41d0023a3303f22b76f80bf12257ac712:e2658b99599c7431220779dc4b6e7c7ca6a35b8a1b0e6dacad5a6cacfe4c5260",
+   "signature": "0x60a9b1106391076585c372057f4ec0991ee3ab93cbc4ef9aab5f21a1f9d853665268de14be2baab3b114ec7ed36aa981a3a98fd4f06c526bc08bbcd23e8949a61c",
+   "signing_address": "0x2665cce942fa427ef30d87f4b0bff67fb7645462",
+   "brief_hash": "92466473e766fdd6b166dc5ec83b7ef30155edfa6dcc6ec87ecbd70c62d36dfb"
+  },
+  {
+   "rid": "c403744f9d5c29ca398d940bbec83219",
+   "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+   "text": "Qwen/Qwen3-VL-30B-A3B-Instruct:0d555c3f87bacadcf0df0db73fe2172e6a15cb1e194e2eaf080b3edfcb277de1:07156a3d8630ec6f2d7d3277e22a310741f7684b2197552029486163d869d29e",
+   "signature": "0x6b73e851bfd699e93bf2c5c5c5256d411edb1a0938fc1a923a1fbb12f28ffc7806666fcccf7fa67ae6b6a9792dbca14c5764ce63080af7f0058f973daabca74d1c",
+   "signing_address": "0x2665cce942fa427ef30d87f4b0bff67fb7645462",
+   "brief_hash": "a5d67b59d7dae2583a2e70b50447c10657b8ad6568a417368ee9dd74cbcb9ce4"
+  },
+  {
+   "rid": "31741b451b7862cfa5ad53a712e294fa",
+   "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+   "text": "Qwen/Qwen3-VL-30B-A3B-Instruct:76ae0c5844bf892c103fd6acd8024abdae4068d67f23ad6a1ec8bc33f1ba26a9:2204513542a890c7db3e24323ae56f2a6b3da6536fb0ee77d3d5a86a7099847f",
+   "signature": "0xc5a5eabe14963b0e88ea4d959c21ddcc002990ff3e977a4bb102a04dfc7fe9e70c3eeed14085f56f7d71bb81991203bf38ccebb48b19f46ff36dee3af9e92c451c",
+   "signing_address": "0x2665cce942fa427ef30d87f4b0bff67fb7645462",
+   "brief_hash": "1ea58feb846b158007b1b807e257289542333ae00c265ec6d828f4bbe82599e5"
+  },
+  {
+   "rid": "df1e5e7033c0c71fbbb57d9503a025ee",
+   "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+   "text": "Qwen/Qwen3-VL-30B-A3B-Instruct:7b8e18f8577ef15fc8474e73eff92348f3f65a823c98c1230abf9db8734ab62d:4471ff476c586de9e46bdac8825758ce46e0dc54de551d25be9795b6e4a2baf9",
+   "signature": "0xc38f8c647d8604dde50910765056868d99b054317eabeeec5fed798d68cfb29848ed28569383cc8be7d136066493a9b423a284c94682c9f857d4e78fc6d8afc81b",
+   "signing_address": "0x2665cce942fa427ef30d87f4b0bff67fb7645462",
+   "brief_hash": "7fc2289634ba1432b59d5f5e7294299185718eb435a0c73dec12408139b63722"
+  },
+  {
+   "rid": "e9528e6a1426cc2cb9489b0009d799d3",
+   "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+   "text": "Qwen/Qwen3-VL-30B-A3B-Instruct:5527326b4b32ed7c4929b629165c4ff41d0023a3303f22b76f80bf12257ac712:f28ee570fe3033bfaaf45affbd62f54e80abf389ae89f333db62bec06ae851f8",
+   "signature": "0x05f8a32ee9fe8a155680c395c08f454840f246fe60f1eb95dc83b5c1cb13bfe93c4648ab2e2c674d999e70332b14ed7abdecd04bbfe8e1f323e5f417d16da2821c",
+   "signing_address": "0x2665cce942fa427ef30d87f4b0bff67fb7645462",
+   "brief_hash": "b07202f1c1a7deba251a92b686d3e3fd5fb9b0873ee03c33517e18063c9ea399"
+  },
+  {
+   "rid": "c6b6043147936c1b7549ff5bffe8e547",
+   "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+   "text": "Qwen/Qwen3-VL-30B-A3B-Instruct:0d555c3f87bacadcf0df0db73fe2172e6a15cb1e194e2eaf080b3edfcb277de1:8b5d6215f70a331604ee56b7f552a9ed67954b40f6f11943e67d20c3016f1e5c",
+   "signature": "0x18049a47b4a3cf256943b4dc3c3a81f50d1df0d15ce44ae3a0d7727d976b413803addeb6a67c609ab4fc4a169509dd64c31cca072fccd5e75eec40c4005630af1c",
+   "signing_address": "0x2665cce942fa427ef30d87f4b0bff67fb7645462",
+   "brief_hash": "ffb9c0c821d6bedd27b6babd02af456bc7b24710516ca1e3e87b3361d01dc4e6"
+  },
+  {
+   "rid": "b1496abced2499744db98b2d7263cbf0",
+   "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+   "text": "Qwen/Qwen3-VL-30B-A3B-Instruct:76ae0c5844bf892c103fd6acd8024abdae4068d67f23ad6a1ec8bc33f1ba26a9:de2c4ba2a2c94886069d18af6818132ff8bd57a6fdcc9115381ecc592f94eb5e",
+   "signature": "0x6b93b1fef3b2e416cfbee4ad9b9a17d4bd81a34b4e35f299bb39be490ac803153620910d699fd48c63d37e14b19b8225446543a7e956888de63cda735d4ed8c71b",
+   "signing_address": "0x2665cce942fa427ef30d87f4b0bff67fb7645462",
+   "brief_hash": "6f5848f7adedca876acba7361fc9b7ad2ebfee367918d8b15f1201a30de142c3"
+  },
+  {
+   "rid": "abe7ceda1e37d968937f8b5cc6dd80f4",
+   "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+   "text": "Qwen/Qwen3-VL-30B-A3B-Instruct:5527326b4b32ed7c4929b629165c4ff41d0023a3303f22b76f80bf12257ac712:f9933fff3c1907b411feb10a3990ad264e01aaa738786cc25397f7484cedc35d",
+   "signature": "0xd573d895216b095f4566aa33d94e6778d94778f15a29f05591e9986de1db4eb64ebf4b21db61a4e1b9489004c7851f85d973f60266996ad62b8cfdea7c7f9e451c",
+   "signing_address": "0x2665cce942fa427ef30d87f4b0bff67fb7645462",
+   "brief_hash": "ed2e4f0159387cc46d1711c19649a74484a3d7fff15d4a0157bf04092eb8166b"
+  }
+ ]
+}

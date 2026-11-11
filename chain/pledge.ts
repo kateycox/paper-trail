@@ -3,7 +3,7 @@
 // Each brief (leaf) can be funded by exactly one pledge, and anyone can check that on-chain.
 //
 // Usage:
-//   bun pledge.ts new <amount_usd>   create a pledge ($25 funds one brief), match it, write it to NEAR
+//   bun pledge.ts new <amount_usd>   create a pledge ($1 funds one brief), match it, write it to NEAR
 //   bun pledge.ts match              match waiting pledges against unfunded briefs (anchor.ts runs this after each batch)
 import { readFileSync, writeFileSync, existsSync, mkdirSync, rmdirSync, appendFileSync } from "node:fs";
 import { homedir } from "node:os";
@@ -14,8 +14,8 @@ import { ACCOUNT, SOCIAL } from "./lib";
 const DATA = "/home/workspace/Paper-Trail/data";
 const FILE = `${DATA}/pledges.json`;
 const LOCK = `${DATA}/.pledge.lock`;
-export const PRICE_PER_BRIEF = 25;
-export const AMOUNTS = [25, 50, 100];
+export const PRICE_PER_BRIEF = 1;
+export const AMOUNTS = [1, 3, 5];
 const MAX_PER_HOUR = 30;
 const MAX_WAITING = 50;
 
@@ -35,12 +35,12 @@ async function lock<T>(fn: () => Promise<T>): Promise<T> {
   try { return await fn(); } finally { rmdirSync(LOCK); }
 }
 
-// Oldest anchored briefs first. Pilot batch b1 (v1, before receipt ids) is not fundable.
+// Newest verified batch first (a gift funds this week's proven work). Pilot batch b1 (v1, before receipt ids) is not fundable.
 function allocate(all: Pledge[]) {
   const taken = new Set(all.flatMap((p) => p.funds.flatMap((a) => a.leaves)));
   const pledges = all.filter((p) => funded(p) < p.briefs);
   const free: { batch_id: string; leaf: string }[] = [];
-  for (const b of batches()) if (b.v === 2) for (const l of b.leaves) if (!taken.has(l)) free.push({ batch_id: b.id, leaf: l });
+  for (const b of batches().reverse()) if (b.v >= 2) for (const l of b.leaves) if (!taken.has(l)) free.push({ batch_id: b.id, leaf: l });
   const changed: Pledge[] = [];
   for (const p of pledges) {
     let need = p.briefs - funded(p);
@@ -119,7 +119,7 @@ if (import.meta.main) {
   try {
     if (cmd === "new") console.log(JSON.stringify(await newPledge(Number(arg))));
     else if (cmd === "match") console.log(JSON.stringify(await matchWaiting()));
-    else { console.error("usage: bun pledge.ts new <25|50|100> | match"); process.exit(2); }
+    else { console.error("usage: bun pledge.ts new <1|3|5> | match"); process.exit(2); }
   } catch (e: any) {
     console.log(JSON.stringify({ error: String(e?.message || e) }));
     process.exit(1);

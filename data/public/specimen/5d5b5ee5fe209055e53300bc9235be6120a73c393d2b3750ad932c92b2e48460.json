@@ -1,0 +1,6 @@
+{
+ "leaf": "5d5b5ee5fe209055e53300bc9235be6120a73c393d2b3750ad932c92b2e48460",
+ "brief_hash": "3e24b9eb93c45029e515982c2178101e5dfb7ce2fe737d0787c6680ec5b87d60",
+ "brief": "PAPER TRAIL CASE BRIEF\nPrepared Nov 11, 2026 from the client's documents. Not legal advice. Originals are with the client.\n\nPERSON\nName on documents: MARIA GUADALUPE LOPEZ RAMIREZ (Passport or national ID)\nDate of birth: Apr 12, 1990\nCountry of birth: MEXICO\nA-Number: not yet captured\n\nDOCUMENTS\n○ Notice to Appear (I-862): missing\n○ Court hearing notice: missing\n✓ Passport or national ID, expires Mar 15, 2024\n○ Birth certificate: missing\n○ I-94 or entry record: missing\n○ USCIS receipt notice (I-797): missing\n○ Proof of time in the US (lease, pay stub, school or medical record): missing\n○ Family member's US citizenship or green card: missing\n\nFLAGS\n⚠ Passport or national ID expired Mar 15, 2024.\n\nPRIVACY\nEvery document was read inside a NEAR AI Confidential TEE and the photo deleted. Latest TEE receipt: Qwen/Qwen3-VL-30B-A3B-Instruct, signer 0x2665cce942fa427ef30d87f4b0bff67fb7645462, request chatcmpl-90922a18-cf6d-494f-b7b2-9e74b4203920.",
+ "note": "SPECIMEN brief from fake test documents. Real briefs are never published."
+}
