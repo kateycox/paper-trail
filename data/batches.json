@@ -1,0 +1,57 @@
+[
+ {
+  "id": "b1",
+  "v": 1,
+  "root": "27c96a85ec1617fd146727c8e5423266fbf8132ce57bab4df3b5bd40358442bd",
+  "briefs": 3,
+  "period": "2026-W46",
+  "langs": {
+   "es": 3
+  },
+  "models": [
+   "Qwen/Qwen3-VL-30B-A3B-Instruct"
+  ],
+  "signers": [
+   "0x2665cce942fa427ef30d87f4b0bff67fb7645462"
+  ],
+  "tx": "4LtmhGZRsyhCJMFVr6kkWsQu8N27WsE1gzY7JMoJtt94",
+  "anchoredAt": "2026-11-11",
+  "leaves": [
+   "46cfcf23b24a0ddb92b2f56ada78f06b76c982892417ed34f74b55366879bc72",
+   "79ed827012fe5fa0319b5aeae7487dfaf64af76a9f970946fea75663900db7e1",
+   "52fef3db8365fcc494fb6665af1f51fe72d434dd80ee1bc5683717ffb59d515b"
+  ]
+ },
+ {
+  "id": "2026-W46-01",
+  "v": 2,
+  "batch_id": "2026-W46-01",
+  "merkle_root": "6be1c9e433313ad231064c9947789e9c5faeba47506eb4339c05ec282b4dbc16",
+  "count_bucket": "10-24",
+  "week_of": "2026-11-09",
+  "models": [
+   "Qwen/Qwen3-VL-30B-A3B-Instruct"
+  ],
+  "signers": [
+   "0x2665cce942fa427ef30d87f4b0bff67fb7645462"
+  ],
+  "tx": "4ApJ3aps7FmqXLPkpv8s71Ub14qJiDYcx19HFLMZSBW4",
+  "briefs": 10,
+  "langs": {
+   "es": 10
+  },
+  "anchoredAt": "2026-11-11",
+  "leaves": [
+   "7022e542974e95dc05c208c290a41c640431dfeadefa75c7ad7ca6f2216a7b3d",
+   "6ea8044565a82c74857808537508b3425d6a9d1ea996cf0410a8948ff816604d",
+   "9f2b1d6a4b1bc9d681303a7625ffdbddd33d127be3741acbcae45a917a64503e",
+   "6c8a188c913d3ada149529a300923ff4d34e3df00f6e09a84bb20732189538fa",
+   "bdfd286f2826096e2a3944fcb7475dca76eabe8c74a26dfb0bfd8366d41325b4",
+   "8e640970fbf38ba351fef29efc19bd20a8c5eeb4ab5b19cb6f8d4ecd197cc368",
+   "625bd3c6db4c654fb0ed01a9d1ea44a859f521babac6d0674c3ac70c7bac7d2a",
+   "06f195531480412adaa06ff45ca9442ce2bc18c96bb48237d11591ec94fce9c1",
+   "f36ceb71599e82810a282ec65a781c216462ebbe0254add538e77db6ddf02c34",
+   "acf9a3d028895f2dce1e0ca34c02460e4371d0d29282b62df91cd75c25059146"
+  ]
+ }
+]
