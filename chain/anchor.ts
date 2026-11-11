@@ -86,3 +86,6 @@ writeFileSync(`${DATA}/public/batch-${id}.json`, JSON.stringify({ id, ...record,
 batches.push({ id, ...record, tx, briefs: valid.length, langs, anchoredAt: new Date().toISOString().slice(0, 10), leaves: valid.map((r) => leaf(r).toString("hex")) });
 writeFileSync(`${DATA}/batches.json`, JSON.stringify(batches, null, 1));
 console.log(JSON.stringify({ anchored: true, id, count_bucket: record.count_bucket, root: record.merkle_root, tx, explorer: `https://testnet.nearblocks.io/txns/${tx}` }));
+
+const { matchWaiting } = await import("./pledge");
+console.log(JSON.stringify({ pledges_matched: await matchWaiting() }));

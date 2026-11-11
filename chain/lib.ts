@@ -45,3 +45,12 @@ export async function attestedSigners(model: string, key: string): Promise<Set<s
   for (const m of j.model_attestations || []) if (m.signing_address) out.add(String(m.signing_address).toLowerCase());
   return out;
 }
+
+export async function socialGet(key: string): Promise<any> {
+  const args = Buffer.from(JSON.stringify({ keys: [`${ACCOUNT}/papertrail/${key}`] })).toString("base64");
+  const r: any = await (await fetch(RPC, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "query", params: { request_type: "call_function", finality: "final", account_id: SOCIAL, method_name: "get", args_base64: args } }),
+  })).json();
+  return r.result ? JSON.parse(Buffer.from(r.result.result).toString())?.[ACCOUNT]?.papertrail ?? null : null;
+}

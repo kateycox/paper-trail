@@ -5,3 +5,5 @@ data/receipts.jsonl
 .env
 .near-credentials/
 data/impact/
+data/pledges.json
+data/.pledge.lock
